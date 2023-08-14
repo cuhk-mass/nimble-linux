@@ -3984,7 +3984,7 @@ walk_shadow_page_get_mmio_spte(struct kvm_vcpu *vcpu, u64 addr, u64 *sptep)
 		 * reserved bit and EPT's invalid memtype/XWR checks to avoid
 		 * adding a Jcc in the loop.
 		 */
-		reserved |= __is_bad_mt_xwr(rsvd_check, spte) |
+		reserved |= (int)__is_bad_mt_xwr(rsvd_check, spte) |
 			    __is_rsvd_bits_set(rsvd_check, spte, iterator.level);
 	}
 
