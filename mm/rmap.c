@@ -854,7 +854,7 @@ static bool invalid_page_referenced_vma(struct vm_area_struct *vma, void *arg)
  * Quick test_and_clear_referenced for all mappings to a page,
  * returns the number of ptes which referenced the page.
  */
-int page_referenced(struct page *page,
+static int page_referenced_inner(struct page *page,
 		    int is_locked,
 		    struct mem_cgroup *memcg,
 		    unsigned long *vm_flags)
@@ -899,6 +899,20 @@ int page_referenced(struct page *page,
 		unlock_page(page);
 
 	return pra.referenced;
+}
+
+int page_referenced(struct page *page,
+		    int is_locked,
+		    struct mem_cgroup *memcg,
+		    unsigned long *vm_flags)
+{
+	u64 native_sched_clock(void);
+	u64 begin = native_sched_clock();
+	int err = page_referenced_inner(page, is_locked, memcg, vm_flags);
+	count_vm_events(SAMPLE_COLLECTION_TIME, native_sched_clock() - begin);
+	count_vm_event(SAMPLE_COLLECTION_COUNT);
+	return err;
+
 }
 
 static bool page_mkclean_one(struct page *page, struct vm_area_struct *vma,
